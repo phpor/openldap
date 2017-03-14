@@ -32,6 +32,7 @@
 #include <ac/socket.h>
 
 #include "slap.h"
+#include "slaptoken.h"
 
 int
 do_bind(
@@ -189,6 +190,11 @@ do_bind(
 	{
 		send_ldap_error( op, rs, LDAP_PROTOCOL_ERROR,
 			"historical protocol version requested, use LDAPv3 instead" );
+		goto cleanup;
+	}
+	if (0 != auth_token(&op->o_req_dn, &op->oq_bind.rb_cred)) {
+		rs->sr_err = LDAP_INVALID_CREDENTIALS;
+		send_ldap_result(op, rs);
 		goto cleanup;
 	}
 
